@@ -1,0 +1,16 @@
+- name: Configure iscsi initiator
+  become: true
+  hosts: pcm
+  tasks:
+    - name: Find target
+      shell: >
+        iscsiadm -m discovery -t st -p 192.168.56.150 &&
+        iscsiadm -m node &&
+        iscsiadm -m node -l -T iqn.2023-02.ru.otus:storage.target00 
+    - name: Service enable
+      service:
+        name: iscsid.service
+        state: restarted
+        enabled: yes
+     
+        

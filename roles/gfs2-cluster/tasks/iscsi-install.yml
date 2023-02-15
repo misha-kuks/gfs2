@@ -1,0 +1,48 @@
+---
+- name: Configure gfs2-cluster
+  become: true
+  hosts: iscsi
+  tasks:
+    - name: Install packages
+      yum:
+        name: targetcli
+        state: present
+    - name: Enable target.service
+      service:
+        name: target.service
+        state: restarted
+        enabled: yes 
+    - name: Configure target
+      shell: targetcli /backstores/block create disk01 /dev/sdb
+      ignore_errors: true  
+    - name: Configure target
+      shell: targetcli /iscsi create iqn.2023-02.ru.otus:storage.target00
+      ignore_errors: true 
+    - name: Configure target
+      shell: targetcli /iscsi/iqn.2023-02.ru.otus:storage.target00/tpg1/portals create 0.0.0.0
+      ignore_errors: true
+    - name: Configure target
+      shell: targetcli /iscsi/iqn.2023-02.ru.otus:storage.target00/tpg1/luns create /backstores/block/disk01 lun=1
+      ignore_errors: true
+    - name: Configure target
+      shell: targetcli /iscsi/iqn.2023-02.ru.otus:storage.target00/tpg1/luns ls lun1
+      ignore_errors: true
+    - name: Configure target
+      shell: targetcli /iscsi/iqn.2023-02.ru.otus:storage.target00/tpg1 set attribute authentication=0
+      ignore_errors: true
+    - name: Configure target
+      shell: targetcli /iscsi/iqn.2023-02.ru.otus:storage.target00/tpg1 set auth userid=otus
+      ignore_errors: true          
+    - name: Configure target
+      shell: targetcli /iscsi/iqn.2023-02.ru.otus:storage.target00/tpg1 set auth password=otus
+      ignore_errors: true
+    - name: Configure target
+      shell: targetcli /iscsi/iqn.2023-02.ru.otus:storage.target00/tpg1/acls create iqn.2023-02.ru.otus:pcm1
+      ignore_errors: true       
+    - name: Configure target
+      shell: targetcli /iscsi/iqn.2023-02.ru.otus:storage.target00/tpg1/acls create iqn.2023-02.ru.otus:pcm2
+      ignore_errors: true
+    - name: Configure target
+      shell: targetcli /iscsi/iqn.2023-02.ru.otus:storage.target00/tpg1/acls create iqn.2023-02.ru.otus:pcm3
+      ignore_errors: true   
+      

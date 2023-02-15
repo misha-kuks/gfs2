@@ -1,0 +1,43 @@
+---
+- name: Configure gfs2-cluster
+  become: true
+  hosts: pcm
+  vars:
+    pacemaker_hacluster_user: "hacluster"
+    pacemaker_hacluster_password: "OtusLearnC1"
+  tasks:
+    - name: Install packages
+      yum:
+        name: 
+          - lvm2 
+          - gfs2-utils 
+          - lvm2-cluster
+          - dlm
+          - iscsi-initiator-utils
+          - pcs
+          - fence-agents-all
+        state: present
+    - name: Password for user hacluster
+      user:
+        name: "{{ pacemaker_hacluster_user }}"
+        password: "{{ pacemaker_hacluster_password | password_hash('sha512') }}"
+      become: true
+    - name: Restart service pcd
+      service:
+        name: pcsd
+        state: restarted
+        enabled: yes
+    - name: Change initiator name
+      lineinfile: 
+        dest: /etc/iscsi/initiatorname.iscsi
+        regexp: 'InitiatorName'
+        line: 'InitiatorName=iqn.2023-02.ru.otus:{{ ansible_hostname }}'
+        state: present
+    - name: Enable clvm
+      shell: lvmconf --enable-cluster
+    - name: Disable lvm2-lvmetad
+      service: 
+        name: lvm2-lvmetad
+        state: stopped
+        enabled: false 
+
