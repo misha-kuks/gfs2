@@ -1,0 +1,15 @@
+---
+- name: Change /etc/hosts
+  hosts: iscsi:pcm
+  become: true
+  become_user: root
+  tasks:
+    - name: "Изменяем файл /etc/hosts"
+      copy:
+        src: hosts
+        dest: /etc/hosts
+        owner: root
+        group: root
+        mode: '0644'
+        backup: yes 
+  

@@ -1,5 +1,5 @@
 ---
-- name: Configure gfs2-cluster
+- name: Create GFS2 FS on node pcm1 and syncronize it on all cluster nodes
   become: true
   hosts: pcm1
   tasks:
@@ -15,10 +15,19 @@
       shell: >
         pcs resource create clusterfs Filesystem device="/dev/cluster_vg/cluster_lv" directory="/mnt/gfs2" \
         fstype="gfs2" "options=noatime" op monitor interval=10s on-fail=ignore clone interleave=true
-    - name: 
+    - name: Constraint order and colocation
       shell: >
         pcs constraint order start clvmd-clone then clusterfs-clone &&
         pcs constraint colocation add clusterfs-clone with clvmd-clone
-
+- name: Results
+  become: true
+  hosts: pcm
+  tasks:   
+    - name: "Show result:"
+      shell: lsblk
+      register: results
+    - name: It's work!
+      debug:
+        var: results
 
       

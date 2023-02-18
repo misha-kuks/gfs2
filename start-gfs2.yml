@@ -1,0 +1,19 @@
+---
+# tasks file for gfs2-cluster
+#Prepare servers
+- import_playbook: tasks/preconfig.yml
+
+#Install gfs2
+- import_playbook: tasks/gfs2-install.yml
+
+#Configure pacemaker
+- import_playbook: tasks/pcm-config.yml
+
+#Install iscsi target
+- import_playbook: tasks/iscsi-install.yml
+
+#Install iscsi target
+- import_playbook: tasks/iscsi-initiator.yml
+
+#Configure GFS2 FS
+- import_playbook: tasks/gfs2-final.yml

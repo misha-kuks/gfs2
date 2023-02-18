@@ -1,5 +1,5 @@
 ---
-- name: Configure gfs2-cluster
+- name: Configure iscsi target host
   become: true
   hosts: iscsi
   tasks:

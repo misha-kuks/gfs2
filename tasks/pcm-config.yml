@@ -1,0 +1,49 @@
+---
+- name: Configure Pacemaker on node pcm1
+  become: true
+  hosts: pcm1
+  tasks:
+    - name: Wait
+      wait_for:
+         timeout: 30
+    - name: Auth cluster
+      shell: pcs cluster auth pcm1 pcm2 pcm3 -u hacluster -p OtusLearnC1
+      register: pcs_auth
+    - name: "Pacemaker cluster auth:"
+      debug: 
+        var: pcs_auth
+    - name: Wait
+      wait_for:
+         timeout: 30
+    - name: Create cluster
+      shell: pcs cluster setup --start --name gfs2-cluster pcm1 pcm2 pcm3
+      register: pcs_cluster_setup
+    - name: "Pacemaker cluster setup:"
+      debug: 
+        var: pcs_cluster_setup  
+    - name: Wait
+      wait_for:
+          timeout: 30
+    - name: Enable cluster
+      shell: pcs cluster enable --all
+      register: pcs_enable
+    - name: "Pacemaker cluster enable:"
+      debug: 
+        var: pcs_enable
+    - name: Wait
+      wait_for:
+          timeout: 30
+    - name: Set property     
+      shell: >
+        pcs property set no-quorum-policy=freeze &&
+        pcs property set stonith-enabled=false && 
+        pcs resource create dlm systemd:dlm op monitor interval=30s on-fail=ignore clone interleave=true ordered=true &&
+        pcs resource create clvmd ocf:heartbeat:clvm op monitor interval=30s on-fail=ignore clone interleave=true ordered=true &&
+        pcs constraint order start dlm-clone then clvmd-clone &&
+        pcs constraint colocation add clvmd-clone with dlm-clone
+      
+   
+    
+       
+        
+        
